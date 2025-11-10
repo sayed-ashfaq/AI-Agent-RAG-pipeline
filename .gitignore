@@ -12,3 +12,7 @@ wheels/
 # Secret Files
 .env
 /.env
+
+
+# data
+data/
