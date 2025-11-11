@@ -1,0 +1,45 @@
+name : Agentic_RAG
+description: "An Agentic_RAG that can decide what tools to use whether it is using pdf of use whether api to retrieve about wheather"
+
+
+
+
+embedding_model:
+  google:
+    provider: "google"
+    model_name: "models/text-embedding-004"
+
+  openai:
+    provider: "openai"
+    model_name: "text-embedding-3-small"
+
+
+retriever:
+  top_k: 10
+  chunk_size: 1000
+  chunk_overlap: 200
+
+llm:
+  openai:
+    provider: "openai"
+    model_name: "gpt-4o"
+    temperature: 0.3
+    max_output_tokens: 2048
+  groq:
+    provider: "groq"
+    model_name: "deepseek-r1-distill-llama-70b" # deprecated no longer can be used.
+    temperature: 0
+    max_output_tokens: 2048
+
+  google:
+    provider: "google"
+    model_name: "gemini-2.0-flash"
+    temperature: 0.3
+    max_output_tokens: 2048
+
+multimodal:
+  enabled: false
+  provider: "openai" # vision provider: "openai" | "groq" | "google"
+  vision_model: "gpt-4o"
+  hires_strategy: true # use unstructured partition strategy="hi_res"
+  max_images: 5 # Groq vision supports up to 5 images per request
