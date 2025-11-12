@@ -1,4 +1,8 @@
+from uuid import uuid4
+import time
 from typing import List, Literal
+
+from langchain_core.documents import Document
 from typing_extensions import TypedDict, Annotated
 import operator
 
@@ -21,7 +25,7 @@ from custom_logger import GLOBAL_LOGGER as logger
 from exception_handler.agent_exceptions import WorkflowError, FileProcessingError, RetrieverError
 
 
-class AgentRAG:
+class ReActAgent:
     class AgentState(TypedDict):
         messages: Annotated[List[AnyMessage], operator.add]
         llm_calls: int
@@ -145,6 +149,27 @@ class AgentRAG:
 
         return workflow
 
+    def _store_chat_history(self, session_id: str, messages: list):
+        """Convert messages into Documents and push to Qdrant vector store."""
+        docs = []
+        for idx, msg in enumerate(messages):
+            # Convert any message (Human, AI, Tool, etc.) to text
+            if not getattr(msg, "content", None):
+                continue
+            content = msg.content
+            metadata = {
+                "session_id": session_id,
+                "role": msg.__class__.__name__,
+                "timestamp": int(time.time()),
+                "turn_index": idx,
+            }
+            docs.append(Document(page_content=content, metadata=metadata))
+
+        if not docs:
+            return
+        uuids = [str(uuid4()) for _ in range(len(docs))]
+        self.retriever.vector_store.add_documents(documents=docs, ids=uuids)
+
     # ------- Runner -------
     def run(self, query: str, thread_id: str = "default_thread") -> str:
         """Run the workflow for a given query and return the final LLM answer"""
@@ -154,10 +179,14 @@ class AgentRAG:
         )
 
         final_msg = output["messages"][-1]
-        return getattr(final_msg, "content", "No final content returned.")
+        final_output=  getattr(final_msg, "content", "No final content returned.")
+
+        # store chat history to vectore store
+        self._store_chat_history(thread_id, output["messages"][-1])
+        return final_output
 
 if __name__ == "__main__":
-    agent = AgentRAG()
+    agent = ReActAgent()
     print("="*25,"First Question","="*25)
     print(agent.run(query="What is your name?"))
     print("="*25,"Second Question","="*25)

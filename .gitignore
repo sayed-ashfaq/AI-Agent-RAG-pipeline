@@ -20,3 +20,6 @@ data/
 #logs
 logs/
 *.log
+
+# vector store
+vector_store/

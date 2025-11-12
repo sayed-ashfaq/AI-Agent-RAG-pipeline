@@ -4,11 +4,13 @@ from pathlib import Path
 from typing import Optional
 import time
 
+from langchain_core.documents import Document
+
 from src.tools.rag_agent.document_loader import DocumentService
 from src.tools.rag_agent.retriever import Retriever
 from custom_logger import GLOBAL_LOGGER as logger
 
-from src.workflow.agent_workflow import AgentRAG
+from src.workflow.agent_workflow import ReActAgent
 
 
 def get_file_extension(filename: str) -> str:
@@ -71,7 +73,7 @@ def initialize_session_state():
 
     if "agent" not in st.session_state:
         with st.spinner(":rocket: Initializing AI Agent..."):
-            st.session_state.agent = AgentRAG(retriever=st.session_state.retriever)
+            st.session_state.agent = ReActAgent(retriever=st.session_state.retriever)
 
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
@@ -93,7 +95,7 @@ def chat_page():
 
     # with chat_container:
     if not st.session_state.chat_history:
-        st.warning("Connected and ready. What’s your query?", icon="👋")
+        st.info("Connected and ready. What’s your query?", icon="👋")
     else:
         for message in st.session_state.chat_history:
             if message["role"] == "user":
@@ -110,6 +112,8 @@ def chat_page():
             "role": "user",
             "content": prompt
         })
+        # add chat history to the vector storage
+
 
         # Get agent response
         with st.spinner("🤔 Thinking..."):

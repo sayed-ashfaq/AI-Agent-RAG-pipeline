@@ -45,5 +45,5 @@ multimodal:
   max_images: 5 # Groq vision supports up to 5 images per request
 
 qdrant:
-  collection_name : "second-collection"
+  collection_name : "eval-collection"
   dim_size: 3072

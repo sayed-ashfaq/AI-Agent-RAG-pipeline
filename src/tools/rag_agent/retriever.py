@@ -20,7 +20,7 @@ class Retriever:
         self.config = load_config()
 
         # using inmemory - can be upgraded to anytype using config settings
-        self.client = QdrantClient(path="S:\\Generative AI\\AI-Agent-RAG-pipeline\\vector_store")
+        self.client = QdrantClient(":memory:")
 
         self.collection_name = self.config['qdrant']['collection_name']
 
