@@ -1,5 +1,5 @@
 [project]
-name = "weatherapi"
+name = "AI-Agent-RAG-pipeline"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -13,13 +13,16 @@ dependencies = [
     "langchain-qdrant>=1.1.0",
     "langchain-text-splitters>=1.0.0",
     "langgraph>=1.0.2",
+    "markdown>=3.10",
     "notebook>=7.4.7",
     "pandas>=2.3.3",
     "pymupdf>=1.26.6",
+    "pyowm>=3.5.0",
     "pypdf2>=3.0.1",
     "python-docx>=1.2.0",
     "python-dotenv>=1.2.1",
     "python-pptx>=1.0.2",
     "streamlit>=1.51.0",
     "structlog>=25.5.0",
+    "unstructured>=0.18.18",
 ]

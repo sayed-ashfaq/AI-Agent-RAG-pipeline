@@ -11,7 +11,7 @@ embedding_model:
 
   openai:
     provider: "openai"
-    model_name: "text-embedding-3-small"
+    model_name: "text-embedding-3-large"
 
 
 retriever:
@@ -43,3 +43,7 @@ multimodal:
   vision_model: "gpt-4o"
   hires_strategy: true # use unstructured partition strategy="hi_res"
   max_images: 5 # Groq vision supports up to 5 images per request
+
+qdrant:
+  collection_name : "demo-collection"
+  dim_size: 3072

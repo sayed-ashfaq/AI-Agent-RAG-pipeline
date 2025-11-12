@@ -75,6 +75,18 @@ class DataProcessingError(AgentRagException):
     """Raised when RAG data pipeline processing fails."""
     pass
 
+class QdrantServiceError(AgentRagException):
+    """Raised when Qdrant service fails."""
+    pass
+
+class WorkflowError(AgentRagException):
+    """Raised when workflow fails."""
+    pass
+
+class RetrieverError(AgentRagException):
+    """Raised when retriever fails."""
+    pass
+
 
 # ---- Example Usage ----
 if __name__ == "__main__":
