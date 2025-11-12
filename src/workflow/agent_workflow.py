@@ -13,6 +13,7 @@ from langchain_community.utilities import OpenWeatherMapAPIWrapper
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import StateGraph, START, END
 
+from src.prompt_library.system_prompt import AGENT_SYSTEM_PROMPT_CONCISE
 from src.tools.rag_agent.document_loader import DocumentService
 from src.tools.rag_agent.retriever import Retriever
 from src.utils.model_loader import ModelLoader
@@ -25,10 +26,11 @@ class AgentRAG:
         messages: Annotated[List[AnyMessage], operator.add]
         llm_calls: int
 
-    def __init__(self):
-        self.retriever = Retriever()
+    def __init__(self, retriever= None):
+        self.retriever = retriever if retriever is not None else Retriever()
         self.model_loader = ModelLoader()
         self.llm = self.model_loader.load_llm()
+        self.system_prompt = AGENT_SYSTEM_PROMPT_CONCISE
 
         self.checkpointer = MemorySaver()
 
@@ -90,7 +92,7 @@ class AgentRAG:
         messages = state["messages"]
 
         result = self.model_with_tools.invoke(
-            [SystemMessage(content="You are a helpful assistant that answers based on context.")]
+            [SystemMessage(content=self.system_prompt)]
             + messages
         )
 
