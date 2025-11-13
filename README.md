@@ -11,7 +11,7 @@ AI agents can dynamically choose and execute tools to deliver accurate, context-
 
 ### LangGraph Node Workflow
 
-![LangGraph Node Workflow](assets/node.png)
+![LangGraph Node Workflow](resources/workflow.png)
 
 - AI-Agent-RAG-Pipeline is an intelligent agentic application built using LangGraph and LangChain 
 - it dynamically decides when to fetch real-time weather data or perform document-based question answering using Retrieval-Augmented 
