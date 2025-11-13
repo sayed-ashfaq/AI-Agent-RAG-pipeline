@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from typing import Optional
 import time
+from uuid import uuid4
 
 from langchain_core.documents import Document
 
@@ -52,7 +53,6 @@ def process_and_add_document(file_path: str, filename: str, retriever: Retriever
             return None
 
         # Generate UUIDs and add to vector store
-        from uuid import uuid4
         uuids = [str(uuid4()) for _ in range(len(retrieved_docs))]
         retriever.vector_store.add_documents(documents=retrieved_docs, ids=uuids)
 
@@ -63,6 +63,35 @@ def process_and_add_document(file_path: str, filename: str, retriever: Retriever
     except Exception as e:
         logger.error(f"Error processing document: {e}")
         return None
+
+def store_chat_history_in_vstore(retriever, chat_history: list):
+    """
+    Store chat history messages in the vector store.
+
+    Each message (user/assistant) becomes a Document with simple metadata.
+    """
+    if not chat_history:
+        return
+
+    # Convert chat messages to LangChain Documents
+    docs = []
+    for msg in chat_history:
+        docs.append(
+            Document(
+                page_content=msg["content"],
+                metadata={
+                    "role": msg["role"],
+                    "type": "chat_history"
+                },
+            )
+        )
+
+    # Generate unique IDs for each message and add them
+    uuids = [str(uuid4()) for _ in range(len(docs))]
+    retriever.vector_store.add_documents(documents=docs, ids=uuids)
+    logger.info("Successfully Added chat history messages to vector store")
+    return uuids
+
 
 
 def initialize_session_state():
@@ -127,6 +156,7 @@ def chat_page():
                     "role": "assistant",
                     "content": response
                 })
+                store_chat_history_in_vstore(st.session_state.retriever, st.session_state.chat_history)
 
             except Exception as e:
                 logger.error(f"Error getting agent response: {e}")
