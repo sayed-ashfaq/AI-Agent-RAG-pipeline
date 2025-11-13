@@ -40,7 +40,7 @@ def process_and_add_document(file_path: str, filename: str, retriever: Retriever
     try:
         file_extension = get_file_extension(file_path)
 
-        supported_types = ['pdf', 'txt', 'docx', 'doc']
+        supported_types = ['pdf', 'txt', 'docx', 'doc', 'md']
         if file_extension not in supported_types:
             st.warning(f"File type '.{file_extension}' may not be supported.")
             return None
