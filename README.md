@@ -81,13 +81,24 @@ The system follows a modular, agentic workflow built using LangGraph:
 ![App UI](assets/ui/app_ui.png)
 
 ### LangSmith Evaluation Results
-![LangSmith Eval](assets/langsmith_1.png)
+`Evaluating RAG based on four metrics`
+![LangSmith Eval RAG](assets/langsmith_1.png)
 
-### Workflow Graph
-![Agent Workflow](assets/graphs/agent_graph.png)
+`Evaluating LLM's response correctness`
+![LangSmith Eval Agent](assets/langsmith_2.png)
+
+### LangSmith Monitoring - Calls, Cost and tokens
+![LangSmith Eval](assets/langsmith_cost_tokens.png)
+### Tools Usage
+![LangSmith Eval](assets/langsmith_tools_usage.png)
 
 ### Logs & Test Results
-![Logs and Tests](assets/logs/test_results.png)
+`pytest results for agent`
+![Logs and Tests](assets/pytest_agent_results.png)
+
+`pytest results for weather api`
+![Logs and Tests](assets/pytest_weather_api_results.png)
+
 
 ## Project Structure
 ```bash
