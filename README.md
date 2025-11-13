@@ -12,7 +12,7 @@ AI agents can dynamically choose and execute tools to deliver accurate, context-
 ### LangGraph Node Workflow
 
 <div align="center">
-  <img src="resources/workflow.png" alt="LangGraph Node Workflow" width="250"/>
+  <img src="assets/workflow.png" alt="LangGraph Node Workflow" width="250"/>
 </div>)
 
 - AI-Agent-RAG-Pipeline is an intelligent agentic application built using LangGraph and LangChain 
@@ -81,7 +81,7 @@ The system follows a modular, agentic workflow built using LangGraph:
 ![App UI](assets/ui/app_ui.png)
 
 ### LangSmith Evaluation Results
-![LangSmith Eval](assets/evals/langsmith_eval.png)
+![LangSmith Eval](assets/langsmith_1.png)
 
 ### Workflow Graph
 ![Agent Workflow](assets/graphs/agent_graph.png)
