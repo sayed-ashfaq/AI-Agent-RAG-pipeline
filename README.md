@@ -1,11 +1,19 @@
 # Multi-Agent RAG Pipeline
 
 
-## Problem Statement
-Build an intelligent assistant that can handle two different types of user queries and must intelligently decide which source/tool to use based on the user's question.
+## Overview
+OmniAgent is an intelligent application designed with 
 
-1. Real-time information: Fetch current weather data for any location using **Weather API**
-2. Document-based questions: Answer questions from uploaded PDF documents using **RAG**
+AI-Resume-Analyzer is an intelligent application designed to help job seekers improve their resumes and get personalized career advice. By combining natural language processing and machine learning techniques, the system analyzes resume content and provides tailored feedback, suggestions, and answers to career-related questions.
+
+## topics should be covered in this
+1. Overview
+2. Images
+3. Nodes
+4. Logs
+5. How it works
+6. vector storage explanation
+7. project structure
 
 ## Things to remember while developing
 1. Langgraph and langchain usage
