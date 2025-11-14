@@ -2,10 +2,12 @@
 
 ---
 ## Overview
+
 AI-Agent-RAG-Pipeline is an intelligent assistant designed for developers and AI enthusiasts to explore 
 how agentic systems make autonomous **decisions**. It combines **real-time weather insights** and 
 **document-based question** answering using **LangGraph**, **LangChain**, and **Qdrant**, showcasing how 
 AI agents can dynamically choose and execute tools to deliver accurate, context-aware responses.
+
 ---
 ## How it works
 
@@ -13,11 +15,13 @@ AI agents can dynamically choose and execute tools to deliver accurate, context-
 
 <div align="center">
   <img src="assets/workflow.png" alt="LangGraph Node Workflow" width="250"/>
-</div>)
+</div>
 
 - AI-Agent-RAG-Pipeline is an intelligent agentic application built using LangGraph and LangChain 
 - it dynamically decides when to fetch real-time weather data or perform document-based question answering using Retrieval-Augmented 
 Generation (RAG). 
+  - In the above image dotted lines represent the conditional paths
+  - solid line represents the default path that will happen.
 - It leverages a Qdrant vector store for context retrieval, 
 - Integrates custom logging, exception handling
 - Evaluation via LangSmith, and includes pytest-based testing for reliability.  

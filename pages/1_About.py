@@ -1,49 +1,55 @@
 import streamlit as st
 
-st.markdown("### 🚀 About This Application")
+st.markdown("## 🤖 About This Application")
 
 st.markdown("""
-## AI Agent with RAG & Tools
+**AI-Agent-RAG-Pipeline** is an intelligent agent built using **LangGraph** and **LangChain**, designed to demonstrate how AI systems can autonomously choose between multiple tools and respond contextually.  
+It combines **real-time weather information** and **document-based question answering (RAG)** into a unified conversational interface.
+""")
 
-This intelligent agent combines multiple capabilities to provide comprehensive assistance:
+st.divider()
 
-### 🎯 Key Features
+st.markdown("### 🎯 Key Features")
 
+st.markdown("""
 #### 1. **Document Analysis (RAG)**
 - Upload and process multiple document formats (PDF, TXT, DOCX)
-- Intelligent document chunking and embedding
-- Semantic search across your knowledge base
-- Context-aware responses based on document content
+- Embeds documents using OpenAI embeddings and stores them in Qdrant
+- Performs semantic retrieval for context-aware responses
+- Supports multi-turn, context-based Q&A
 
-#### 2. **Real-time Weather Information**
-- Get current weather data for any location worldwide
-- Powered by OpenWeatherMap API
-- Temperature, conditions, and forecast information
+#### 2. **Real-time Weather Data**
+- Fetches accurate, up-to-date weather details using OpenWeatherMap API
+- Provides temperature, humidity, and conditions for any global location
 
 #### 3. **Conversational AI**
-- Natural language understanding
-- Context retention across conversations
-- Multi-turn dialogue support
+- LLM-based reasoning powered by LangChain
+- Handles tool selection autonomously
+- Maintains context and supports multi-turn dialogue
+""")
 
-### 🏗️ Architecture
+st.divider()
 
+st.markdown("### 🏗️ Architecture")
+
+st.markdown("""
 **Technology Stack:**
-- **Framework**: LangGraph + LangChain
-- **Vector Store**: Qdrant (Local)
-- **LLM**: OpenAI GPT Models
-- **UI**: Streamlit
-- **Embeddings**: OpenAI Embeddings
+- **Framework**: LangGraph + LangChain  
+- **Vector Store**: Qdrant (Local or Cloud)  
+- **LLM**: OpenAI GPT Models  
+- **UI**: Streamlit  
+- **Embeddings**: OpenAI Embeddings  
 
 **Workflow:**
 """)
 
 st.code("""
 flowchart LR
-    A[User Query] --> B[Agent (LLM)]
+    A[User Query] --> B[LLM Node]
     B --> C[Decision Node]
     C --> D[Tool Node (RAG / Weather)]
     D --> E[Context Retrieved]
-    E --> F[Agent (with context)]
+    E --> F[LLM Node (with Context)]
     F --> G[Final Response]
     G --> H[User Output]
     C --> I[Direct Response]
@@ -51,42 +57,68 @@ flowchart LR
 """, language="mermaid")
 
 st.markdown("""
-### 📊 Use Cases
+<div align="center">
+  <img src="assets/graphs/node_graph.png" alt="LangGraph Node Workflow" width="600"/>
+</div>
+""", unsafe_allow_html=True)
 
-1. **Research Assistant**: Upload research papers and ask questions
-2. **Document Q&A**: Extract information from long documents
-3. **Travel Planning**: Check weather before trips
-4. **Knowledge Management**: Build a searchable knowledge base
+st.divider()
 
-### 🔒 Privacy & Security
+st.markdown("### 📊 Use Cases")
 
-- Documents are stored locally in Qdrant vector database
-- No data is sent to external servers except for LLM API calls
-- Easy document deletion for data management
-
-### 📈 Performance
-
-- **Response Time**: 2-5 seconds average
-- **Document Processing**: ~1 second per page
-- **Vector Search**: Sub-second retrieval
-- **Concurrent Users**: Optimized for single-user sessions
-
-### 🛠️ Future Enhancements
-
-- [ ] Multi-modal document support (images, tables)
-- [ ] Advanced filtering and search options
-- [ ] Export conversation history
-- [ ] Custom embedding models
-- [ ] API endpoint for programmatic access
-
----
-
-**Version**: 1.0.0  
-**Last Updated**: November 2024  
-**Built with**: ❤️ by Your Team
+st.markdown("""
+1. **Research Assistant** — Upload academic papers and ask context-based questions  
+2. **Document Q&A** — Extract structured information from reports or documents  
+3. **Travel Planning** — Query live weather data for destinations  
+4. **Knowledge Management** — Build and query your personalized knowledge base  
 """)
 
-# Example queries
+st.divider()
+
+st.markdown("### 🔒 Privacy & Security")
+
+st.markdown("""
+- All uploaded data stays local in Qdrant  
+- Only model API calls go to OpenAI (no third-party data sharing)  
+- Users can clear data anytime  
+""")
+
+st.divider()
+
+st.markdown("### ⚙️ Performance Metrics")
+
+st.markdown("""
+| Metric | Average |
+|:--------|:---------|
+| Response Time | 2–5 seconds |
+| Document Processing | ~1 second per page |
+| Vector Retrieval | <1 second |
+| Concurrent Users | Optimized for single-user sessions |
+""")
+
+st.divider()
+
+st.markdown("### 🧭 Future Enhancements")
+
+st.markdown("""
+- [ ] Multi-modal document support (images, tables)
+- [ ] Advanced filtering and semantic search options
+- [ ] Exportable conversation history
+- [ ] Support for custom embedding models
+- [ ] REST API for programmatic access
+""")
+
+
+st.divider()
+
+st.markdown("""
+**Version:** 1.0.0  
+**Last Updated:** November 2024  
+**Built with ❤️ by Your Team**
+""")
+
+st.divider()
+
 st.markdown("### 💡 Example Queries")
 
 col1, col2 = st.columns(2)
@@ -95,8 +127,8 @@ with col1:
     st.markdown("""
     **Document Questions:**
     - "Summarize the main findings in the uploaded paper"
-    - "What methodology was used in the research?"
-    - "Find all mentions of [specific topic]"
+    - "What methodology was used in this report?"
+    - "Find all mentions of deep learning models"
     """)
 
 with col2:
