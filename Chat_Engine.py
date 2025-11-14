@@ -114,13 +114,10 @@ def initialize_session_state():
         # Store: {filename: {"uuids": [...], "upload_time": "...", "chunks": int}}
         st.session_state.documents_metadata = {}
 
-    if "api_keys_set" not in st.session_state:
-        st.session_state.api_keys_set = False
-
 
 def welcome_page():
     """Display welcome page with instructions"""
-    st.markdown("# :brain: Welcome to OmniChat")
+    st.markdown("## 🚀 Welcome to OmniChat")
     st.markdown("---")
 
     st.markdown("""
@@ -130,14 +127,36 @@ def welcome_page():
     To get started, simply enter your API keys in the sidebar, upload your documents, and start chatting! 
     The AI will use the uploaded documents as context to provide accurate and relevant answers to your questions.
 
-    **Getting Started:**
-    1. Enter your OpenAI API Key and OpenWeather API Key in the sidebar
-    2. Click "Start Using OmniChat" to proceed
-    3. Upload documents (PDF, TXT, DOCX) for the AI to reference
-    4. Ask questions and get intelligent responses based on your documents
-    """)
+    ---
 
-    st.info("👈 Please enter your API keys in the sidebar to begin", icon="🔑")
+    ### 🔑 Getting Started
+
+    **Step 1:** Get your API keys:
+
+    1. **[OpenAI API Key](https://platform.openai.com/api-keys)** 
+       - Sign up for OpenAI account
+       - Go to API Keys section
+       - Create new secret key
+
+    2. **[OpenWeather API Key](https://openweathermap.org/api)**
+       - Create free account
+       - Get API key from dashboard
+       - Free tier available
+
+    **Step 2:** Enter your API keys in the sidebar ← 
+
+    **Step 3:** Upload documents (PDF, TXT, DOCX) for the AI to reference
+
+    **Step 4:** Ask questions and get intelligent responses!
+
+    ---
+
+    ### 💡 Pro Tips
+    - All processing happens securely - keys are only stored during your session
+    - Upload multiple documents to build a comprehensive knowledge base
+    - The AI remembers conversation context throughout your session
+    - Use the "Clear Chat History" button to start fresh conversations
+    """)
 
 
 def chat_page():
@@ -206,37 +225,50 @@ def main():
         st.markdown("---")
 
         # API Keys section
-        st.markdown("### 🔑 API Configuration")
+        st.header("🔑 API Configuration")
+        st.markdown("*Enter your API keys to get started*")
 
+        # OpenAI API Key
         openai_key = st.text_input(
-            "Enter your OpenAI API Key:",
+            "OpenAI API Key",
             type="password",
             placeholder="sk-...",
-            key="openai_key_input"
+            help="Required for AI-powered chat and document analysis"
         )
+        if not openai_key:
+            st.markdown("👆 [Get OpenAI API Key](https://platform.openai.com/api-keys)")
+        else:
+            os.environ["OPENAI_API_KEY"] = openai_key
+            st.success("✅ OpenAI key configured")
 
+        # OpenWeather API Key
         weather_key = st.text_input(
-            "Enter your OpenWeather API Key:",
+            "OpenWeather API Key",
             type="password",
             placeholder="Enter OpenWeather API Key",
-            key="weather_key_input"
+            help="Required for weather-related queries"
         )
+        if not weather_key:
+            st.markdown("👆 [Get OpenWeather API Key](https://openweathermap.org/api)")
+        else:
+            os.environ["OPENWEATHER_API_KEY"] = weather_key
+            st.success("✅ OpenWeather key configured")
 
-        # Button to set API keys
-        if st.button("🚀 Start Using OmniChat", use_container_width=True):
-            if openai_key and weather_key:
-                os.environ["OPENAI_API_KEY"] = openai_key
-                os.environ["OPENWEATHER_API_KEY"] = weather_key
-                st.session_state.api_keys_set = True
-                st.success("API keys set successfully!")
-                st.rerun()
-            else:
-                st.error("Please enter both API keys")
+        # Check if all keys are provided
+        all_keys_provided = bool(openai_key and weather_key)
 
-        # Show rest of sidebar only if keys are set
-        if st.session_state.api_keys_set:
-            st.markdown("---")
+        if not all_keys_provided:
+            st.warning("⚠️ Please provide all API keys to use the app")
+            st.markdown("""
+            **Why these APIs?**
+            - **OpenAI**: AI chat and document embeddings
+            - **OpenWeather**: Real-time weather information
+            """)
 
+        st.markdown("---")
+
+        # Show document upload only if keys are set
+        if all_keys_provided:
             # Upload section
             st.markdown("### Upload Your Documents")
             st.caption("Drag and drop files here")
@@ -319,15 +351,18 @@ def main():
             if st.button("🗑️ Clear Chat History", use_container_width=True):
                 st.session_state.chat_history = []
                 st.rerun()
+        else:
+            st.info("🔒 Enter API keys above to unlock features")
 
     # Main content area
-    if not st.session_state.api_keys_set:
-        welcome_page()
-    else:
+    if all_keys_provided:
         # Initialize session state after keys are set
         initialize_session_state()
         # Load chat page
         chat_page()
+    else:
+        # Show welcome page when API keys are missing
+        welcome_page()
 
 
 if __name__ == "__main__":
