@@ -1,12 +1,14 @@
 # Multi-Agent RAG Pipeline
-
 ---
+
 ## Overview
 
 AI-Agent-RAG-Pipeline is an intelligent assistant designed for developers and AI enthusiasts to explore 
 how agentic systems make autonomous **decisions**. It combines **real-time weather insights** and 
 **document-based question** answering using **LangGraph**, **LangChain**, and **Qdrant**, showcasing how 
 AI agents can dynamically choose and execute tools to deliver accurate, context-aware responses.
+
+**Disclaimer**: If you try to use the app directly on Streamlit Cloud, some features may not work due to environment or API constraints. To see the app working as intended, please fork the repository and run it on your own local/server environment. 
 
 ---
 ## How it works
