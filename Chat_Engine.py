@@ -64,7 +64,6 @@ def process_and_add_document(file_path: str, filename: str, retriever: Retriever
         logger.error(f"Error processing document: {e}")
         return None
 
-
 def store_chat_history_in_vstore(retriever, chat_history: list):
     """
     Store chat history messages in the vector store.
@@ -94,6 +93,7 @@ def store_chat_history_in_vstore(retriever, chat_history: list):
     return uuids
 
 
+
 def initialize_session_state():
     """Initialize session state variables"""
     if "retriever" not in st.session_state:
@@ -115,50 +115,6 @@ def initialize_session_state():
         st.session_state.documents_metadata = {}
 
 
-def welcome_page():
-    """Display welcome page with instructions"""
-    st.markdown("## 🚀 Welcome to OmniChat")
-    st.markdown("---")
-
-    st.markdown("""
-    ### How to Use This App
-
-    OmniChat is an intelligent AI assistant powered by RAG (Retrieval-Augmented Generation) technology. 
-    To get started, simply enter your API keys in the sidebar, upload your documents, and start chatting! 
-    The AI will use the uploaded documents as context to provide accurate and relevant answers to your questions.
-
-    ---
-
-    ### 🔑 Getting Started
-
-    **Step 1:** Get your API keys:
-
-    1. **[OpenAI API Key](https://platform.openai.com/api-keys)** 
-       - Sign up for OpenAI account
-       - Go to API Keys section
-       - Create new secret key
-
-    2. **[OpenWeather API Key](https://openweathermap.org/api)**
-       - Create free account
-       - Get API key from dashboard
-       - Free tier available
-
-    **Step 2:** Enter your API keys in the sidebar ← 
-
-    **Step 3:** Upload documents (PDF, TXT, DOCX) for the AI to reference
-
-    **Step 4:** Ask questions and get intelligent responses!
-
-    ---
-
-    ### 💡 Pro Tips
-    - All processing happens securely - keys are only stored during your session
-    - Upload multiple documents to build a comprehensive knowledge base
-    - The AI remembers conversation context throughout your session
-    - Use the "Clear Chat History" button to start fresh conversations
-    """)
-
-
 def chat_page():
     """Main chat interface page"""
     st.markdown("### :man_astronaut: Engage with the AI")
@@ -168,7 +124,7 @@ def chat_page():
 
     # with chat_container:
     if not st.session_state.chat_history:
-        st.info("Connected and ready. What's your query?", icon="👋")
+        st.info("Connected and ready. What’s your query?", icon="👋")
     else:
         for message in st.session_state.chat_history:
             if message["role"] == "user":
@@ -186,6 +142,7 @@ def chat_page():
             "content": prompt
         })
         # add chat history to the vector storage
+
 
         # Get agent response
         with st.spinner("🤔 Thinking..."):
@@ -211,6 +168,8 @@ def chat_page():
         st.rerun()
 
 
+
+
 def main():
     st.set_page_config(
         page_title="AI Agent with RAG",
@@ -219,150 +178,104 @@ def main():
         initial_sidebar_state="expanded"
     )
 
-    # Sidebar for API keys and document management
+    # Initialize session state
+    initialize_session_state()
+
+    # Sidebar for document management
     with st.sidebar:
         st.markdown("# :brain: OmniChat")
         st.markdown("---")
+        # api section
+        api_key = st.sidebar.text_input("Enter your OpenAI API Key:", type="password")
+        # Upload section
+        st.markdown("### Upload Your Documents")
+        st.caption("Drag and drop files here")
 
-        # API Keys section
-        st.header("🔑 API Configuration")
-        st.markdown("*Enter your API keys to get started*")
-
-        # OpenAI API Key
-        openai_key = st.text_input(
-            "OpenAI API Key",
-            type="password",
-            placeholder="sk-...",
-            help="Required for AI-powered chat and document analysis"
+        uploaded_files = st.file_uploader(
+            "Choose files",
+            type=['pdf', 'txt', 'docx', 'doc'],
+            accept_multiple_files=True,
+            label_visibility="collapsed",
+            key="file_uploader"
         )
-        if not openai_key:
-            st.markdown("👆 [Get OpenAI API Key](https://platform.openai.com/api-keys)")
-        else:
-            os.environ["OPENAI_API_KEY"] = openai_key
-            st.success("✅ OpenAI key configured")
 
-        # OpenWeather API Key
-        weather_key = st.text_input(
-            "OpenWeather API Key",
-            type="password",
-            placeholder="Enter OpenWeather API Key",
-            help="Required for weather-related queries"
-        )
-        if not weather_key:
-            st.markdown("👆 [Get OpenWeather API Key](https://openweathermap.org/api)")
-        else:
-            os.environ["OPENWEATHER_API_KEY"] = weather_key
-            st.success("✅ OpenWeather key configured")
+        # Auto-process uploaded files
+        if uploaded_files:
+            for uploaded_file in uploaded_files:
+                # Check if file already processed
+                if uploaded_file.name not in st.session_state.documents_metadata:
+                    with st.spinner(f"⚙️ Processing {uploaded_file.name}..."):
+                        # Save file
+                        file_path = save_uploaded_file(uploaded_file)
 
-        # Check if all keys are provided
-        all_keys_provided = bool(openai_key and weather_key)
+                        if file_path:
+                            # Process and add to vector store
+                            uuids = process_and_add_document(
+                                file_path,
+                                uploaded_file.name,
+                                st.session_state.retriever
+                            )
 
-        if not all_keys_provided:
-            st.warning("⚠️ Please provide all API keys to use the app")
-            st.markdown("""
-            **Why these APIs?**
-            - **OpenAI**: AI chat and document embeddings
-            - **OpenWeather**: Real-time weather information
-            """)
+                            if uuids:
+                                # Store metadata
+                                st.session_state.documents_metadata[uploaded_file.name] = {
+                                    "uuids": uuids,
+                                    "upload_time": time.strftime("%Y-%m-%d %H:%M:%S"),
+                                    "chunks": len(uuids)
+                                }
+                                st.success(f"✅ {uploaded_file.name}")
+                            else:
+                                st.error(f"❌ Failed to process {uploaded_file.name}")
+
+                            # Clean up temp file
+                            try:
+                                os.remove(file_path)
+                            except:
+                                pass
 
         st.markdown("---")
 
-        # Show document upload only if keys are set
-        if all_keys_provided:
-            # Upload section
-            st.markdown("### Upload Your Documents")
-            st.caption("Drag and drop files here")
+        # Display uploaded documents with delete option
+        if st.session_state.documents_metadata:
+            st.markdown("### 📚 Knowledge Base")
 
-            uploaded_files = st.file_uploader(
-                "Choose files",
-                type=['pdf', 'txt', 'docx', 'doc'],
-                accept_multiple_files=True,
-                label_visibility="collapsed",
-                key="file_uploader"
-            )
+            for filename, metadata in list(st.session_state.documents_metadata.items()):
+                with st.container():
+                    col1, col2 = st.columns([3, 1])
 
-            # Auto-process uploaded files
-            if uploaded_files:
-                for uploaded_file in uploaded_files:
-                    # Check if file already processed
-                    if uploaded_file.name not in st.session_state.documents_metadata:
-                        with st.spinner(f"⚙️ Processing {uploaded_file.name}..."):
-                            # Save file
-                            file_path = save_uploaded_file(uploaded_file)
+                    with col1:
+                        st.markdown(f"📄 **{filename}**")
+                        st.caption(f"{metadata['chunks']} chunks • {metadata['upload_time']}")
 
-                            if file_path:
-                                # Process and add to vector store
-                                uuids = process_and_add_document(
-                                    file_path,
-                                    uploaded_file.name,
-                                    st.session_state.retriever
-                                )
+                    with col2:
+                        if st.button("🗑️", key=f"delete_{filename}", help="Delete document"):
+                            # Delete from vector store
+                            try:
+                                for uuid in metadata["uuids"]:
+                                    st.session_state.retriever.delete_document(uuid)
 
-                                if uuids:
-                                    # Store metadata
-                                    st.session_state.documents_metadata[uploaded_file.name] = {
-                                        "uuids": uuids,
-                                        "upload_time": time.strftime("%Y-%m-%d %H:%M:%S"),
-                                        "chunks": len(uuids)
-                                    }
-                                    st.success(f"✅ {uploaded_file.name}")
-                                else:
-                                    st.error(f"❌ Failed to process {uploaded_file.name}")
+                                # Remove from metadata
+                                del st.session_state.documents_metadata[filename]
+                                st.success(f"Deleted {filename}")
+                                st.rerun()
+                            except Exception as e:
+                                st.error(f"Error deleting: {e}")
 
-                                # Clean up temp file
-                                try:
-                                    os.remove(file_path)
-                                except:
-                                    pass
 
-            st.markdown("---")
-
-            # Display uploaded documents with delete option
-            if st.session_state.documents_metadata:
-                st.markdown("### 📚 Knowledge Base")
-
-                for filename, metadata in list(st.session_state.documents_metadata.items()):
-                    with st.container():
-                        col1, col2 = st.columns([3, 1])
-
-                        with col1:
-                            st.markdown(f"📄 **{filename}**")
-                            st.caption(f"{metadata['chunks']} chunks • {metadata['upload_time']}")
-
-                        with col2:
-                            if st.button("🗑️", key=f"delete_{filename}", help="Delete document"):
-                                # Delete from vector store
-                                try:
-                                    for uuid in metadata["uuids"]:
-                                        st.session_state.retriever.delete_document(uuid)
-
-                                    # Remove from metadata
-                                    del st.session_state.documents_metadata[filename]
-                                    st.success(f"Deleted {filename}")
-                                    st.rerun()
-                                except Exception as e:
-                                    st.error(f"Error deleting: {e}")
-
-            else:
-                st.info("📭 No documents uploaded yet")
-
-            # Clear chat button
-            st.markdown("---")
-            if st.button("🗑️ Clear Chat History", use_container_width=True):
-                st.session_state.chat_history = []
-                st.rerun()
         else:
-            st.info("🔒 Enter API keys above to unlock features")
+            st.info("📭 No documents uploaded yet")
 
-    # Main content area
-    if all_keys_provided:
-        # Initialize session state after keys are set
-        initialize_session_state()
-        # Load chat page
-        chat_page()
-    else:
-        # Show welcome page when API keys are missing
-        welcome_page()
+        # Clear chat button
+        st.markdown("---")
+        if st.button("🗑️ Clear Chat History", use_container_width=True):
+            st.session_state.chat_history = []
+            st.rerun()
+
+    # load chat page
+    chat_page()
+
+
+
 
 
 if __name__ == "__main__":
