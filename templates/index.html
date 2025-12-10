@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniChat - AI Agent with RAG</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            background: white;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 300px;
+            background: #f8f9fa;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .sidebar-header h1 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .sidebar-section {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .sidebar-section h3 {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #999;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .document-list {
+            list-style: none;
+        }
+
+        .document-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: white;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .document-item-name {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .document-item-info {
+            font-size: 10px;
+            color: #999;
+            margin: 2px 0;
+        }
+
+        .delete-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+            margin-left: 5px;
+        }
+
+        .delete-btn:hover {
+            background: #ff5252;
+        }
+
+        .upload-area {
+            padding: 20px;
+            background: #f5f5f5;
+            border: 2px dashed #667eea;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            background: #efefff;
+            border-color: #764ba2;
+        }
+
+        .upload-area input[type="file"] {
+            display: none;
+        }
+
+        .upload-text {
+            font-size: 12px;
+            color: #667eea;
+            font-weight: 500;
+        }
+
+        .clear-chat-btn {
+            width: 100%;
+            padding: 10px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: auto;
+        }
+
+        .clear-chat-btn:hover {
+            background: #ff5252;
+        }
+
+        /* Main Chat Area */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .chat-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .chat-header h2 {
+            font-size: 18px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: white;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 20px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.assistant {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+
+        .user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 0;
+        }
+
+        .assistant .message-content {
+            background: #f0f0f0;
+            color: #333;
+            border-bottom-left-radius: 0;
+        }
+
+        .chat-input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: none;
+            max-height: 100px;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .send-btn {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Loading spinner */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #999;
+            animation: typing 1.4s infinite;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.7;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            color: #999;
+            text-align: center;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 200px;
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+            }
+
+            .message-content {
+                max-width: 90%;
+            }
+
+            .send-btn {
+                padding: 10px 15px;
+            }
+        }
+
+        /* Status messages */
+        .status-message {
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin: 10px 0;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h1>🧠 OmniChat</h1>
+                <p>AI Agent with RAG</p>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>📤 Upload Documents</h3>
+                <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-text">Drag & Drop or Click</div>
+                </div>
+                <input type="file" id="fileInput" multiple accept=".pdf,.txt,.docx,.doc,.md" onchange="handleFileUpload(event)">
+            </div>
+
+            <div class="sidebar-section" style="flex: 1; overflow-y: auto;">
+                <h3>📚 Knowledge Base</h3>
+                <ul class="document-list" id="documentList">
+                    <li style="padding: 10px; color: #999; font-size: 12px;">No documents uploaded</li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <button class="clear-chat-btn" onclick="clearChatHistory()">🗑️ Clear Chat</button>
+            </div>
+        </div>
+
+        <!-- Chat Container -->
+        <div class="chat-container">
+            <div class="chat-header">
+                <h2>Chat with AI Agent</h2>
+                <p style="font-size: 12px; opacity: 0.9; margin-top: 5px;">Session: <span id="sessionId">Loading...</span></p>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="empty-state">
+                    <div class="empty-state-icon">👋</div>
+                    <div>Connected and ready. What's your query?</div>
+                </div>
+            </div>
+
+            <div class="chat-input-area">
+                <div class="input-group">
+                    <textarea class="chat-input" id="messageInput" placeholder="Type your message..." rows="1"></textarea>
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let sessionId = null;
+        let isLoading = false;
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', async function() {
+            await initializeSession();
+            loadChatHistory();
+            loadDocuments();
+
+            // Allow Enter to send message
+            document.getElementById('messageInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // Auto-resize textarea
+            document.getElementById('messageInput').addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+            });
+        });
+
+        async function initializeSession() {
+            try {
+                const response = await fetch('/api/session/init', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                sessionId = data.session_id;
+                document.getElementById('sessionId').textContent = sessionId.substring(0, 8) + '...';
+                console.log('Session initialized:', sessionId);
+            } catch (error) {
+                console.error('Error initializing session:', error);
+                showStatus('Failed to initialize session', 'error');
+            }
+        }
+
+        async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+
+            if (!message || isLoading) return;
+
+            isLoading = true;
+            document.getElementById('sendBtn').disabled = true;
+
+            try {
+                // Add user message to chat
+                addMessage('user', message);
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
+
+                // Add loading indicator
+                addLoadingIndicator();
+
+                // Send message to backend
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Session-Id': sessionId
+                    },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        message: message
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Remove loading indicator
+                    removeLoadingIndicator();
+                    // Add assistant response
+                    addMessage('assistant', data.response);
+                } else {
+                    removeLoadingIndicator();
+                    addMessage('assistant', '❌ Error: ' + (data.message || 'Failed to get response'));
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                removeLoadingIndicator();
+                addMessage('assistant', '❌ Error: ' + error.message);
+            } finally {
+                isLoading = false;
+                document.getElementById('sendBtn').disabled = false;
+            }
+        }
+
+        function addMessage(role, content) {
+            const chatMessages = document.getElementById('chatMessages');
+
+            // Remove empty state if present
+            const emptyState = chatMessages.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = content;
+
+            messageDiv.appendChild(contentDiv);
+            chatMessages.appendChild(messageDiv);
+
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function addLoadingIndicator() {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message assistant';
+            messageDiv.id = 'loadingIndicator';
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'typing-indicator';
+            contentDiv.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+
+            messageDiv.appendChild(contentDiv);
+            chatMessages.appendChild(messageDiv);
+
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeLoadingIndicator() {
+            const indicator = document.getElementById('loadingIndicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+
+        async function handleFileUpload(event) {
+            const files = event.target.files;
+
+            for (let file of files) {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                try {
+                    const response = await fetch('/api/documents/upload', {
+                        method: 'POST',
+                        headers: {
+                            'X-Session-Id': sessionId
+                        },
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (data.status === 'success') {
+                        showStatus(`✅ ${file.name} uploaded (${data.chunks} chunks)`, 'success');
+                        loadDocuments();
+                    } else {
+                        showStatus(`❌ ${file.name}: ${data.error || 'Upload failed'}`, 'error');
+                    }
+                } catch (error) {
+                    console.error('Error uploading file:', error);
+                    showStatus(`❌ ${file.name}: ${error.message}`, 'error');
+                }
+            }
+
+            // Reset file input
+            event.target.value = '';
+        }
+
+        async function loadDocuments() {
+            try {
+                const response = await fetch('/api/documents', {
+                    headers: {
+                        'X-Session-Id': sessionId
+                    }
+                });
+
+                const data = await response.json();
+                const documentList = document.getElementById('documentList');
+
+                if (data.documents && data.documents.length > 0) {
+                    documentList.innerHTML = data.documents.map(doc => `
+                        <li class="document-item">
+                            <div>
+                                <div class="document-item-name">📄 ${doc.filename}</div>
+                                <div class="document-item-info">${doc.chunks} chunks • ${new Date(doc.upload_time).toLocaleString()}</div>
+                            </div>
+                            <button class="delete-btn" onclick="deleteDocument('${doc.filename}')">Delete</button>
+                        </li>
+                    `).join('');
+                } else {
+                    documentList.innerHTML = '<li style="padding: 10px; color: #999; font-size: 12px;">No documents uploaded</li>';
+                }
+            } catch (error) {
+                console.error('Error loading documents:', error);
+            }
+        }
+
+        async function deleteDocument(filename) {
+            if (!confirm(`Delete "${filename}"?`)) return;
+
+            try {
+                const response = await fetch(`/api/documents/${encodeURIComponent(filename)}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-Session-Id': sessionId
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    showStatus(`✅ ${filename} deleted`, 'success');
+                    loadDocuments();
+                } else {
+                    showStatus(`❌ Failed to delete ${filename}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting document:', error);
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function clearChatHistory() {
+            if (!confirm('Clear all chat history?')) return;
+
+            try {
+                const response = await fetch('/api/chat/clear', {
+                    method: 'POST',
+                    headers: {
+                        'X-Session-Id': sessionId
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    document.getElementById('chatMessages').innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">👋</div>
+                            <div>Connected and ready. What's your query?</div>
+                        </div>
+                    `;
+                    showStatus('✅ Chat history cleared', 'success');
+                }
+            } catch (error) {
+                console.error('Error clearing chat:', error);
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadChatHistory() {
+            try {
+                const response = await fetch('/api/chat/history', {
+                    headers: {
+                        'X-Session-Id': sessionId
+                    }
+                });
+
+                const messages = await response.json();
+
+                if (messages && messages.length > 0) {
+                    const chatMessages = document.getElementById('chatMessages');
+                    chatMessages.innerHTML = '';
+
+                    messages.forEach(msg => {
+                        addMessage(msg.role, msg.content);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading chat history:', error);
+            }
+        }
+
+        function showStatus(message, type) {
+            // Show status in a non-intrusive way
+            const chatMessages = document.getElementById('chatMessages');
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status-message status-${type}`;
+            statusDiv.textContent = message;
+            chatMessages.appendChild(statusDiv);
+
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                statusDiv.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
