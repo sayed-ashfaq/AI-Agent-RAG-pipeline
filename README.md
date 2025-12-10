@@ -84,7 +84,7 @@ The system follows a modular, agentic workflow built using LangGraph:
 ## 📸 Screenshots & Visuals
 
 ### Streamlit Interface
-![App UI](assets/ui/app_ui.png)
+![App UI](assets/Chat_UI.png)
 
 ### LangSmith Evaluation Results
 `Evaluating RAG based on four metrics`
